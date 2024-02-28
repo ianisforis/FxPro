@@ -15,7 +15,7 @@ public class RingBufferTest {
     @ParameterizedTest
     @ValueSource(ints = {0, -1})
     public void test_create_buffer_with_negative_or_zero_size(int size) {
-        Exception exception = assertThrows(UnsupportedOperationException.class, () -> new RingBuffer(size));
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> new RingBuffer(size));
         assertEquals("Buffer size can't be 0 or less", exception.getMessage());
     }
 
@@ -38,6 +38,7 @@ public class RingBufferTest {
     @Test
     public void test_buffer_overflow() {
         RingBuffer buffer = new RingBuffer(3);
+
         buffer.put(1);
         buffer.put(2);
         buffer.put(3);
@@ -49,6 +50,7 @@ public class RingBufferTest {
     @Test
     public void test_get_more_than_put() {
         RingBuffer buffer = new RingBuffer(3);
+
         buffer.put(1);
         buffer.put(2);
         buffer.put(3);
@@ -62,8 +64,9 @@ public class RingBufferTest {
     }
 
     @Test
-    public void test_FIFO() {
+    public void test_fifo() {
         RingBuffer ringBuffer = new RingBuffer(3);
+
         ringBuffer.put(1);
         ringBuffer.put(2);
         ringBuffer.put(3);
@@ -76,11 +79,14 @@ public class RingBufferTest {
     @Test
     public void test_circular_behavior() {
         RingBuffer buffer = new RingBuffer(3);
+
         buffer.put(1);
         buffer.put(2);
         buffer.put(3);
+
         buffer.get();
         buffer.get();
+
         buffer.put(4);
         buffer.put(5);
 
@@ -92,6 +98,7 @@ public class RingBufferTest {
     @Test
     public void test_put_null() {
         RingBuffer ringBuffer = new RingBuffer(3);
+
         ringBuffer.put(null);
         ringBuffer.put(null);
         ringBuffer.put(null);
