@@ -2,6 +2,7 @@ package org.example;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.concurrent.CountDownLatch;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -67,12 +68,15 @@ public class ThreadSafeRingBufferTest {
     @RepeatedTest(20)
     public void test_concurrent_circular_behavior() throws InterruptedException {
         ThreadSafeRingBuffer buffer = new ThreadSafeRingBuffer(3);
+        CountDownLatch latch1 = new CountDownLatch(1);
+        CountDownLatch latch2 = new CountDownLatch(1);
 
         Thread producer1 = new Thread(() -> {
             try {
                 buffer.put(1);
                 buffer.put(2);
                 buffer.put(3);
+                latch1.countDown();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -80,8 +84,10 @@ public class ThreadSafeRingBufferTest {
 
         Thread consumer1 = new Thread(() -> {
             try {
+                latch1.await();
                 buffer.get();
                 buffer.get();
+                latch2.countDown();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -89,6 +95,7 @@ public class ThreadSafeRingBufferTest {
 
         Thread producer2 = new Thread(() -> {
             try {
+                latch2.await();
                 buffer.put(4);
                 buffer.put(5);
             } catch (InterruptedException e) {
@@ -98,10 +105,10 @@ public class ThreadSafeRingBufferTest {
 
         producer1.start();
         consumer1.start();
+        producer2.start();
+
         producer1.join();
         consumer1.join();
-
-        producer2.start();
         producer2.join();
 
         assertEquals(3, buffer.get());
