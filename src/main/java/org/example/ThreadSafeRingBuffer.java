@@ -18,9 +18,7 @@ public class ThreadSafeRingBuffer {
 
     private final Object[] data;
 
-    //volatile for asserts in tests
-    @Getter
-    private volatile int countEl = 0;
+    private int countEl = 0;
 
     private int countPut = 0;
 
